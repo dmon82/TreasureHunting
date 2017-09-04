@@ -86,7 +86,7 @@ public class Treasurereward {
      */
     public static ArrayList<Item> getTierRewards(double quality) {
         ArrayList<Item> list = new ArrayList<>();
-        int tier = Math.max(9, Math.min(0, (int)quality / 10));
+        int tier = Math.max(0, Math.min(9, (int)quality / 10));
         
         /**
          * 1098: returner tool chest - always contains one of the following,
@@ -108,7 +108,19 @@ public class Treasurereward {
             
             // Additional items as per chance configured.
             for (int i = 0; i < options.getTierOptional()[tier]; i++) {
-                if (random.nextInt(options.getTierChances()[tier]) == 0) {
+                if (options.getTierChances().length < tier) {
+                    logger.warning(String.format("Optional tier chances has only %d tiers, was expecting at least %d.", options.getTierChances().length, tier));
+                    continue;
+                }
+                
+                int tierChance = options.getTierChances()[tier];
+                
+                if (tierChance <= 0) {
+                    logger.warning(String.format("Options reward item chance for tier %d is %d, was expecting greater than zero.", tier, tierChance));
+                    continue;
+                }
+                
+                if (random.nextInt(tierChance) == 0) {
                     Item reward = getRewardItem(tier, quality);
                     
                     if (reward == null) {
@@ -121,7 +133,7 @@ public class Treasurereward {
             }
         }
         catch (Exception e) {
-            logger.log(Level.SEVERE, "Could not generate item tier rewards.", e);
+            logger.log(Level.SEVERE, "Could not generate all item tier rewards.", e);
         }
         
         return list;
@@ -172,6 +184,8 @@ public class Treasurereward {
                 guaranteedRarity = 1;
                 break;
         }
+        
+        logger.info(String.format("Picking reward %d (%d) from reward group %d for tier %d.", rewardIndex, templateId, rewardGroup, tier));
         
         Item reward = ItemFactory.createItem(templateId, (float)quality, getRarity(guaranteedRarity), null);
         reward.setMaterial(getMaterial(ItemTemplateFactory.getInstance().getTemplate(templateId)));
