@@ -195,6 +195,13 @@ public class Treasuremap {
         if (!gamemaster && !ShouldCreateTreasuremap(performer, activated, skill, killed))
             return null;
         
+        // Pickaxe is an identifier for surface mining, and used in the
+        // method ShouldCreateTreasuremap, because it's so much faster than
+        // regular mining and really needs a separate drop chance. Also, the
+        // code wasn't designed for it, so this is a little workaround.
+        if (skill != null && performer != null && skill.getNumber() == 10009 /*SkillList.PICKAXE*/)
+            skill = performer.getSkills().getSkillOrLearn(1008); // Mining.
+        
         TreasureOptions options = TreasureHunting.getOptions();
         Item treasuremap = null;
         
@@ -511,8 +518,13 @@ abort:          for (int ix = x; ix < x + 3; ix++) {
                     return false;
                 
                 return random.nextInt(options.getMapMiningChance()) == 0;
+            case SkillList.PICKAXE:
+                if (options.getMapSurfaceMiningChance() <= 0)
+                    return false;
+                
+                return random.nextInt(options.getMapSurfaceMiningChance()) == 0;
             default:
-                logger.info("Tried to create treasuremap for unapproved activity " + skill.getName());
+                logger.warning("Tried to create treasuremap for unapproved activity " + skill.getName());
                 break;
         }
         

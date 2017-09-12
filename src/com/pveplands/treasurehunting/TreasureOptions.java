@@ -28,6 +28,7 @@ public class TreasureOptions {
     
     private int mapDiggingChance = 10000;
     private int mapMiningChance = 3500;
+    private int mapSurfaceMiningChance = 10000;
     private int mapHuntingChance = 100;
     private int mapUniqueChance = 10000;
     private int mapFishingChance = 10000;
@@ -155,6 +156,10 @@ public class TreasureOptions {
         setMapMiningChance(Integer.valueOf(p.getProperty("mapMiningChance", String.valueOf(getMapMiningChance()))));
         setMapMiningChance(Math.min(2147483647, Math.max(0, getMapMiningChance())));
         logger.log(Level.INFO, "Map mining chance: {0}", getMapMiningChance());
+        
+        setMapSurfaceMiningChance(Integer.valueOf(p.getProperty("mapSurfaceMiningChance", String.valueOf(getMapSurfaceMiningChance()))));
+        setMapSurfaceMiningChance(Math.min(2147483647, Math.max(0, getMapSurfaceMiningChance())));
+        logger.log(Level.INFO, "Map surface mining chance: {0}", getMapSurfaceMiningChance());
 
         setMapHuntingChance(Integer.valueOf(p.getProperty("mapHuntingChance", String.valueOf(getMapHuntingChance()))));
         setMapHuntingChance(Math.min(2147483647, Math.max(0, getMapHuntingChance())));
@@ -1054,5 +1059,13 @@ public class TreasureOptions {
 
     public TreasureBehaviour setBehaviours(TreasureBehaviour behaviours) {
         return this.behaviours = behaviours;
+    }
+
+    public int getMapSurfaceMiningChance() {
+        return mapSurfaceMiningChance;
+    }
+
+    public void setMapSurfaceMiningChance(int mapSurfaceMiningChance) {
+        this.mapSurfaceMiningChance = mapSurfaceMiningChance;
     }
 }

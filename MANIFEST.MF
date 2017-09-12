@@ -2,9 +2,9 @@ Manifest-Version: 1.0
 Ant-Version: Apache Ant 1.9.7
 Created-By: 1.8.0_102-b14 (Oracle Corporation)
 Bundle-Name: TreasureHunting
-Bundle-Version: 1.1.2
-Bundle-Date: 2017-09-04 03:42:20 CEST
+Bundle-Version: 1.1.3
+Bundle-Date: 2017-09-12 10:40:17 CEST
 Implementation-Title: TreasureHunting
-Implementation-Version: 1.1.2
+Implementation-Version: 1.1.3
 Implementation-URL: http://pveplands.com
 
