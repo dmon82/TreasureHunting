@@ -53,6 +53,11 @@ public class ReloadConfigAction implements ActionPerformer, ModAction {
     }
     
     public boolean performMyAction(Creature performer) {
+        if (performer.getPower() <= 1) {
+            logger.warning(String.format("%s tried to reload the TreasureHunting config, likely trying to execute actions they shouldn't have access to, perhaps looking for exploits.", performer));
+            return true;
+        }
+        
         Path path = Paths.get("mods/TreasureHunting.properties");
         
         if (!Files.exists(path)) {

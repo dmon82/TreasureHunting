@@ -44,6 +44,11 @@ public class DigUpTreasureAction implements ActionPerformer, ModAction {
         Item chest = null, lock = null;
         
         try {
+            if (target.getOwnerId() != performer.getWurmId()) {
+                performer.getCommunicator().sendNormalServerMessage("The map needs to be in your inventory.");
+                return true;
+            }
+            
             if (performer.getVehicle() != -10) {
                 performer.getCommunicator().sendNormalServerMessage("You need to be on solid ground.");
                 return true;
@@ -51,6 +56,11 @@ public class DigUpTreasureAction implements ActionPerformer, ModAction {
             
             int x = performer.getTileX(), y = performer.getTileY();
 
+            if (performer.isWithinTileDistanceTo(target.getDataX(), target.getDataY(), 0, 1)) {
+                performer.getCommunicator().sendNormalServerMessage("You're too far away.");
+                return true;
+            }
+                
             int tile = Server.surfaceMesh.getTile(x, y);
             int type = Tiles.decodeType(tile);
 

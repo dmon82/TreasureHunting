@@ -7,6 +7,7 @@ import com.wurmonline.server.items.Item;
 import com.wurmonline.server.zones.Zones;
 import java.util.Arrays;
 import java.util.List;
+import java.util.logging.Logger;
 import javax.annotation.Nonnull;
 import org.gotti.wurmunlimited.modsupport.actions.ActionPerformer;
 import org.gotti.wurmunlimited.modsupport.actions.BehaviourProvider;
@@ -46,6 +47,13 @@ public class TeleportToTreasureAction implements ActionPerformer, ModAction {
     }
     
     private boolean performMyAction(Creature performer, Item target) {
+        if (performer.getPower() <= 1) {
+            Logger.getLogger(TreasureHunting.getLoggerName(CreateRandomTreasuremapAction.class))
+                .warning(String.format("%s tried to teleport themselves to , this might well fall under exploiting.", performer));
+            
+            return true;
+        }
+        
         // X, Y coordinates are saved in Data1 as (x << 16) | y;
         int x = target.getDataX();
         int y = target.getDataY();

@@ -7,6 +7,7 @@ import com.wurmonline.server.items.Item;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
+import java.util.logging.Logger;
 import javax.annotation.Nonnull;
 import org.gotti.wurmunlimited.modsupport.actions.ActionPerformer;
 import org.gotti.wurmunlimited.modsupport.actions.BehaviourProvider;
@@ -39,7 +40,14 @@ public class CreateTreasuremapHereAction implements ActionPerformer, ModAction {
     
     @Override
     public boolean action(@Nonnull Action action, @Nonnull Creature performer, @Nonnull Item source, int tilex, int tiley, boolean onSurface, int heightOffset, int tile, short num, float counter) {
-        Item treasuremap = Treasuremap.CreateTreasuremap(null, null, null, null, true);
+        if (performer.getPower() <= 1) {
+            Logger.getLogger(TreasureHunting.getLoggerName(CreateRandomTreasuremapAction.class))
+                .warning(String.format("%s tried to spawn a treasuremap at their location, this might well fall under exploiting.", performer));
+            
+            return true;
+        }
+        
+        Item treasuremap = Treasuremap.CreateTreasuremap(performer, null, null, null, true);
         
         if (treasuremap == null) {
             performer.getCommunicator().sendNormalServerMessage("Treasuremap creation failed, probably couldn't find a suitable spot. Try again.");

@@ -35,6 +35,13 @@ public class SpawnTreasurechestAction implements ActionPerformer, ModAction {
     
     @Override
     public boolean action(@Nonnull Action action, @Nonnull Creature performer, @Nonnull Item source, int tilex, int tiley, boolean onSurface, int heightOffset, int tile, short num, float counter) {
+        if (performer.getPower() <= 1) {
+            Logger.getLogger(TreasureHunting.getLoggerName(CreateRandomTreasuremapAction.class))
+                .warning(String.format("%s tried to spawn a treasure chest, this might well fall under exploiting.", performer));
+            
+            return true;
+        }
+        
         String log = String.format("%s is spawning a %.2f quality treasurechest.", performer.getName(), source.getCurrentQualityLevel());
         performer.getLogger().info(log);
         logger.info(log);

@@ -41,6 +41,11 @@ public class UnloadFromTreasureAction implements ActionPerformer, ModAction {
     
     private boolean performMyAction(Creature performer, Item target) {
         try {
+            if (!performer.isWithinDistanceTo(target, 8f)) {
+                performer.getCommunicator().sendNormalServerMessage("You're too far away.");
+                return true;
+            }
+            
             target.getParent().dropItem(target.getWurmId(), true);
             target.setLastOwnerId(performer.getWurmId());
             Zones.getZone(performer.getTilePos(), true).addItem(target);

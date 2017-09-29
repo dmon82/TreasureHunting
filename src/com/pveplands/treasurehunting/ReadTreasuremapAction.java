@@ -44,6 +44,11 @@ public class ReadTreasuremapAction implements ActionPerformer, ModAction {
     @Override
     public boolean action(Action action, Creature performer, Item activated, Item target, short num, float counter) {
         try {
+            if (target.getOwnerId() != performer.getWurmId()) {
+                performer.getCommunicator().sendNormalServerMessage("You need to have the map in your inventory.");
+                return true;
+            }
+            
             if (counter == 1.0f) {
                 if (target.getData1() <= 0) {
                     performer.getCommunicator().sendNormalServerMessage("This treasuremap is too weathered to read.");
