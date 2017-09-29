@@ -47,7 +47,7 @@ public class SpawnTreasurechestAction implements ActionPerformer, ModAction {
         logger.info(log);
         log = null;
         
-        Item treasuremap = Treasuremap.CreateTreasuremap(null, null, null, null, true);
+        Item treasuremap = Treasuremap.CreateTreasuremap(performer, null, null, null, true);
         
         if (treasuremap == null) {
             performer.getCommunicator().sendNormalServerMessage("Treasuremap dummy creation failed, probably couldn't find a suitable spot. Try again.");
