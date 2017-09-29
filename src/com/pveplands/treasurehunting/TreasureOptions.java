@@ -91,6 +91,9 @@ public class TreasureOptions {
     private int fantasticRarity = 10000;
     private int rareWindow = 180;
     
+    private int minTreasureDistance = 0;
+    private int maxTreasureDistance = Integer.MAX_VALUE;
+
     private TeleportToTreasureAction teleportAction;
     private CreateRandomTreasuremapAction createmapAction;
     private CreateTreasuremapHereAction createhereAction;
@@ -523,6 +526,12 @@ public class TreasureOptions {
         setTreasuremapTemplateId(Integer.valueOf(p.getProperty("treasuremapTemplateId", String.valueOf(getTreasuremapTemplateId()))));
         setTreasuremapTemplateId(Math.min(32767, Math.max(4200, getTreasuremapTemplateId())));
         logger.log(Level.INFO, "Treasuremap templateID: {0}", getTreasuremapTemplateId());
+        
+        setMinTreasureDistance(Integer.valueOf(p.getProperty("minTreasureDistance", String.valueOf(getMinTreasureDistance()))));
+        logger.info(String.format("Treasuremap min distance from player: %d", getMinTreasureDistance()));
+        
+        setMaxTreasureDistance(Integer.valueOf(p.getProperty("maxTreasureDistance", String.valueOf(getMaxTreasureDistance()))));
+        logger.info(String.format("Treasuremap max distance from player: %d", getMaxTreasureDistance()));
     }
     
     public int getTreasuremapTemplateId() {
@@ -1067,5 +1076,21 @@ public class TreasureOptions {
 
     public void setMapSurfaceMiningChance(int mapSurfaceMiningChance) {
         this.mapSurfaceMiningChance = mapSurfaceMiningChance;
+    }
+    
+    public int getMinTreasureDistance() {
+        return minTreasureDistance;
+    }
+
+    public void setMinTreasureDistance(int minTreasureDistance) {
+        this.minTreasureDistance = Math.max(0, minTreasureDistance);
+    }
+
+    public int getMaxTreasureDistance() {
+        return maxTreasureDistance;
+    }
+
+    public void setMaxTreasureDistance(int maxTreasureDistance) {
+        this.maxTreasureDistance = Math.min(Integer.MAX_VALUE, maxTreasureDistance);
     }
 }

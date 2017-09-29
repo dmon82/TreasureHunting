@@ -199,7 +199,7 @@ public class Treasuremap {
         // method ShouldCreateTreasuremap, because it's so much faster than
         // regular mining and really needs a separate drop chance. Also, the
         // code wasn't designed for it, so this is a little workaround.
-        if (skill != null && performer != null && skill.getNumber() == 10009 /*SkillList.PICKAXE*/)
+        if (!gamemaster && skill != null && performer != null && skill.getNumber() == 10009 /*SkillList.PICKAXE*/)
             skill = performer.getSkills().getSkillOrLearn(1008); // Mining.
         
         TreasureOptions options = TreasureHunting.getOptions();
@@ -212,7 +212,7 @@ public class Treasuremap {
             int x, y;
             int tries = 0;
             int padding = Zones.worldTileSizeX / 20;
-            int maxHeight, minHeight;
+            int maxHeight = 0, minHeight = 0;
             boolean foundSpot = false, isWaterOrLava = false;
             
             int waterCount = 0, heightCount = 0, altarCount = 0, villageCount = 0;
@@ -222,6 +222,15 @@ public class Treasuremap {
                 // border, 5 % tiles of the world's size.
                 x = random.nextInt(Zones.worldTileSizeX - padding * 2) + padding;
                 y = random.nextInt(Zones.worldTileSizeY - padding * 2) + padding;
+
+                if (!IsAcceptableDistance(performer != null ? performer : killed, x, y)) {
+                    if (++tries > options.getCreationTries()) {
+                        logger.warning("Could not find a treasure location that isn't too close or too far away.");
+                        break; // stop trying.
+                    }
+                    
+                    continue; // try again.
+                }
                 
                 // Reset this variable every time we have new coordinates.
                 isWaterOrLava = false;
@@ -264,19 +273,19 @@ abort:          for (int ix = x; ix < x + 3; ix++) {
             // How many times we failed to find a good spot, and what were the
             // reasons that the randomly picked coordinates weren't good.
             if (!foundSpot) {
-                if (performer == null)
-                    logger.info(String.format("No suitable treasuremap spot found for killed creature after %d tries. Failing at Water=%d, Height=%d, Altar=%d, Village=%d.",
-                        tries, waterCount, heightCount, altarCount, villageCount));
-                else 
+                if (killed != null)
+                    logger.info(String.format("No suitable treasuremap spot found for killed creature %s after %d tries. Failing at Water=%d, Height=%d, Altar=%d, Village=%d.",
+                        killed, tries, waterCount, heightCount, altarCount, villageCount));
+                else if (performer != null)
                     logger.log(Level.INFO, String.format("No suitable treasuremap spot found for %s after %d tries. Failing at Water=%d, Height=%d, Altar=%d, Village=%d.",
                         performer.getName(), tries, waterCount, heightCount, altarCount, villageCount));
-
+                
                 return null;
             }
             
             // Vanilla-like rarity chance/
             byte rarity = GetMapRarity(performer);
-            if (!options.isExtraSwirl() && rarity > 0 && performer != null) // extraSwirl ALWAYS does this, so don't duplicate it!
+            if (!gamemaster && !options.isExtraSwirl() && rarity > 0 && performer != null) // extraSwirl ALWAYS does this, so don't duplicate it!
                 performer.playPersonalSound("sound.fx.drumroll");
 
             double diff = options.getMapBaseDiff();
@@ -343,7 +352,7 @@ abort:          for (int ix = x; ix < x + 3; ix++) {
             }
             
             // TODO: set log level to FINE after alpha/beta?
-            if (performer != null) {
+            if (performer != null && !gamemaster) {
                 logger.log(Level.INFO, String.format("%s found a %f quality treasure map for %d, %d using %.2f %s. Skillcheck difficulty was %.2f. Their location is %d, %d.",
                     performer.getName(), treasuremap.getCurrentQualityLevel(), treasuremap.getDataX(), treasuremap.getDataY(), skill.getKnowledge(), skill.getName(), 
                     diff,
@@ -558,6 +567,24 @@ abort:          for (int ix = x; ix < x + 3; ix++) {
             return 1;
 
         return 0;
+    }
+    
+    /**
+     * Checks if the distance from a creature (player or killed creature) is
+     * within the desired bounds set in the properties file.
+     * 
+     * @param from Creature to take the tile distance from.
+     * @param toX Target X tile coordinate.
+     * @param toY Target Y tile coordinate.
+     * @return True if the distance is within bounds, otherwise false.
+     */
+    public static boolean IsAcceptableDistance(Creature from, int toX, int toY) {
+        int distanceFromPlayer = Math.min(Math.abs(toX - from.getTileX()), Math.abs(toY - from.getTileY()));
+
+        logger.info(String.format("%s distance to %d, %d is %d", from, toX, toY, distanceFromPlayer));
+        
+        return distanceFromPlayer >= TreasureHunting.getOptions().getMinTreasureDistance()
+            && distanceFromPlayer <= TreasureHunting.getOptions().getMaxTreasureDistance();
     }
     
     /**
