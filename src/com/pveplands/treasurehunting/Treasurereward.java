@@ -491,10 +491,12 @@ public class Treasurereward {
         
         try {
             int count = options.getBaseSleepPowderReward();
-            int bonus = (int)Math.ceil(quality / 10d * options.getSleepPowderMultiplier() * options.getBaseSleepPowderReward() - options.getBaseSleepPowderReward());
             
-            if (bonus > 0) count += random.nextInt(bonus);
-            else count = (int)Math.ceil(quality / 10d * options.getBaseSleepPowderReward());
+            if (options.getSleepPowderMultiplier() > 0f) {
+                int bonus = (int)Math.ceil(quality / 10d * options.getSleepPowderMultiplier() * options.getBaseSleepPowderReward());
+
+                if (bonus > 0) count += random.nextInt(bonus);
+            }
             
             while (count-- > 0) {
                 Item cocaine = ItemFactory.createItem(666, 99.0f, getRarity(), null);
