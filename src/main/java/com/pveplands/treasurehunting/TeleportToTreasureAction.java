@@ -5,14 +5,12 @@ import com.wurmonline.server.behaviours.ActionEntry;
 import com.wurmonline.server.creatures.Creature;
 import com.wurmonline.server.items.Item;
 import com.wurmonline.server.zones.Zones;
-import java.util.Arrays;
-import java.util.List;
-import java.util.logging.Logger;
-import javax.annotation.Nonnull;
 import org.gotti.wurmunlimited.modsupport.actions.ActionPerformer;
-import org.gotti.wurmunlimited.modsupport.actions.BehaviourProvider;
 import org.gotti.wurmunlimited.modsupport.actions.ModAction;
 import org.gotti.wurmunlimited.modsupport.actions.ModActions;
+import org.jetbrains.annotations.NotNull;
+
+import java.util.logging.Logger;
 
 /**
  * Action to enable staff to teleport to the treasure map's target coordinates.
@@ -37,12 +35,12 @@ public class TeleportToTreasureAction implements ActionPerformer, ModAction {
     }
     
     @Override
-    public boolean action(@Nonnull Action action, @Nonnull Creature performer, @Nonnull Item source, @Nonnull Item target, short num, float counter) {
+    public boolean action(@NotNull Action action, @NotNull Creature performer, @NotNull Item source, @NotNull Item target, short num, float counter) {
         return performMyAction(performer, target);
     }
     
     @Override
-    public boolean action(@Nonnull Action action, @Nonnull Creature performer, @Nonnull Item target, short num, float counter) {
+    public boolean action(@NotNull Action action, @NotNull Creature performer, @NotNull Item target, short num, float counter) {
         return performMyAction(performer, target);
     }
     

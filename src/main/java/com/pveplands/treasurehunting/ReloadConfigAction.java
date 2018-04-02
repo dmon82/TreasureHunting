@@ -12,10 +12,10 @@ import java.nio.file.Paths;
 import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.annotation.Nonnull;
 import org.gotti.wurmunlimited.modsupport.actions.ActionPerformer;
 import org.gotti.wurmunlimited.modsupport.actions.ModAction;
 import org.gotti.wurmunlimited.modsupport.actions.ModActions;
+import org.jetbrains.annotations.NotNull;
 
 public class ReloadConfigAction implements ActionPerformer, ModAction {
     private static final Logger logger = Logger.getLogger(TreasureHunting.getLoggerName(ReloadConfigAction.class));
@@ -38,17 +38,17 @@ public class ReloadConfigAction implements ActionPerformer, ModAction {
     }
     
     @Override
-    public boolean action(@Nonnull Action action, @Nonnull Creature performer, @Nonnull Item source, @Nonnull Item target, short num, float counter) {
+    public boolean action(@NotNull Action action, @NotNull Creature performer, @NotNull Item source, @NotNull Item target, short num, float counter) {
         return performMyAction(performer);
     }
     
     @Override
-    public boolean action(@Nonnull Action action, @Nonnull Creature performer, @Nonnull Item target, short num, float counter) {
+    public boolean action(@NotNull Action action, @NotNull Creature performer, @NotNull Item target, short num, float counter) {
         return performMyAction(performer);
     }
     
     @Override
-    public boolean action(@Nonnull Action action, @Nonnull Creature performer, @Nonnull Item source, int tilex, int tiley, boolean onSurface, int heightOffset, int tile, short num, float counter) {
+    public boolean action(@NotNull Action action, @NotNull Creature performer, @NotNull Item source, int tilex, int tiley, boolean onSurface, int heightOffset, int tile, short num, float counter) {
         return performMyAction(performer);
     }
     

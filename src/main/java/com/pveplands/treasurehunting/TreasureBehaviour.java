@@ -5,28 +5,27 @@ import com.wurmonline.server.creatures.Creature;
 import com.wurmonline.server.items.Item;
 import com.wurmonline.server.items.ItemList;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import javax.annotation.Nonnull;
 import org.gotti.wurmunlimited.modsupport.actions.BehaviourProvider;
 import org.gotti.wurmunlimited.modsupport.actions.ModAction;
+import org.jetbrains.annotations.NotNull;
 
 public class TreasureBehaviour implements BehaviourProvider, ModAction {
     public TreasureBehaviour() {
     }
     
     @Override
-    public List<ActionEntry> getBehavioursFor(@Nonnull Creature performer, @Nonnull Item activated, @Nonnull Item target) {
+    public List<ActionEntry> getBehavioursFor(@NotNull Creature performer, @NotNull Item activated, @NotNull Item target) {
         return getMyBehaviours(performer, activated, target, 0, 0, false, 0);
     }
     
     @Override
-    public List<ActionEntry> getBehavioursFor(@Nonnull Creature performer, @Nonnull Item target) {
+    public List<ActionEntry> getBehavioursFor(@NotNull Creature performer, @NotNull Item target) {
         return getMyBehaviours(performer, null, target, 0, 0, false, 0);
     }
     
     @Override
-    public List<ActionEntry> getBehavioursFor(@Nonnull Creature performer, @Nonnull Item activated, int tilex, int tiley, boolean onSurface, int tile) {
+    public List<ActionEntry> getBehavioursFor(@NotNull Creature performer, @NotNull Item activated, int tilex, int tiley, boolean onSurface, int tile) {
         return getMyBehaviours(performer, activated, null, tilex, tiley, onSurface, tile);
     }
     

@@ -4,15 +4,13 @@ import com.wurmonline.server.behaviours.Action;
 import com.wurmonline.server.behaviours.ActionEntry;
 import com.wurmonline.server.creatures.Creature;
 import com.wurmonline.server.items.Item;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Random;
-import java.util.logging.Logger;
-import javax.annotation.Nonnull;
 import org.gotti.wurmunlimited.modsupport.actions.ActionPerformer;
-import org.gotti.wurmunlimited.modsupport.actions.BehaviourProvider;
 import org.gotti.wurmunlimited.modsupport.actions.ModAction;
 import org.gotti.wurmunlimited.modsupport.actions.ModActions;
+import org.jetbrains.annotations.NotNull;
+
+import java.util.Random;
+import java.util.logging.Logger;
 
 /**
  * Enables staff members to use their wand, to create a treasure map with the
@@ -39,7 +37,7 @@ public class CreateTreasuremapHereAction implements ActionPerformer, ModAction {
     }
     
     @Override
-    public boolean action(@Nonnull Action action, @Nonnull Creature performer, @Nonnull Item source, int tilex, int tiley, boolean onSurface, int heightOffset, int tile, short num, float counter) {
+    public boolean action(@NotNull Action action, @NotNull Creature performer, @NotNull Item source, int tilex, int tiley, boolean onSurface, int heightOffset, int tile, short num, float counter) {
         if (performer.getPower() <= 1) {
             Logger.getLogger(TreasureHunting.getLoggerName(CreateRandomTreasuremapAction.class))
                 .warning(String.format("%s tried to spawn a treasuremap at their location, this might well fall under exploiting.", performer));

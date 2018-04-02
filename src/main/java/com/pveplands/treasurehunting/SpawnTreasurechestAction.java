@@ -13,10 +13,10 @@ import com.wurmonline.server.zones.Zones;
 import java.util.Random;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.annotation.Nonnull;
 import org.gotti.wurmunlimited.modsupport.actions.ActionPerformer;
 import org.gotti.wurmunlimited.modsupport.actions.ModAction;
 import org.gotti.wurmunlimited.modsupport.actions.ModActions;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * Gamemaster feature to spawn a treasure chest.
@@ -34,7 +34,7 @@ public class SpawnTreasurechestAction implements ActionPerformer, ModAction {
     }
     
     @Override
-    public boolean action(@Nonnull Action action, @Nonnull Creature performer, @Nonnull Item source, int tilex, int tiley, boolean onSurface, int heightOffset, int tile, short num, float counter) {
+    public boolean action(@NotNull Action action, @NotNull Creature performer, @NotNull Item source, int tilex, int tiley, boolean onSurface, int heightOffset, int tile, short num, float counter) {
         if (performer.getPower() <= 1) {
             Logger.getLogger(TreasureHunting.getLoggerName(CreateRandomTreasuremapAction.class))
                 .warning(String.format("%s tried to spawn a treasure chest, this might well fall under exploiting.", performer));

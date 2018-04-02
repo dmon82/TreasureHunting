@@ -5,10 +5,10 @@ import com.wurmonline.server.behaviours.ActionEntry;
 import com.wurmonline.server.creatures.Creature;
 import com.wurmonline.server.items.Item;
 import java.util.logging.Logger;
-import javax.annotation.Nonnull;
 import org.gotti.wurmunlimited.modsupport.actions.ActionPerformer;
 import org.gotti.wurmunlimited.modsupport.actions.ModAction;
 import org.gotti.wurmunlimited.modsupport.actions.ModActions;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * Enables staff members to create a treasure map with random target coordinates,
@@ -35,12 +35,12 @@ public class CreateRandomTreasuremapAction implements ActionPerformer, ModAction
     }
 
     @Override
-    public boolean action(@Nonnull Action action, @Nonnull Creature performer, @Nonnull Item source, int tilex, int tiley, boolean onSurface, int heightOffset, int tile, short num, float counter) {
+    public boolean action(@NotNull Action action, @NotNull Creature performer, @NotNull Item source, int tilex, int tiley, boolean onSurface, int heightOffset, int tile, short num, float counter) {
         return performMyAction(performer, source);
     }
     
     @Override
-    public boolean action(@Nonnull Action action, @Nonnull Creature performer, @Nonnull Item source, @Nonnull Item target, short num, float counter) {
+    public boolean action(@NotNull Action action, @NotNull Creature performer, @NotNull Item source, @NotNull Item target, short num, float counter) {
         return performMyAction(performer, source);
     }
     
