@@ -1,0 +1,33 @@
+apply plugin: 'java'
+
+group "mod.sin"
+version "1.0"
+
+repositories {
+    mavenCentral()
+    maven { url "http://gotti.no-ip.org/maven/repository" }
+    maven { url 'https://jitpack.io' }
+}
+
+dependencies {
+    compile 'org.gotti.wurmunlimited:server-modlauncher:0.33-beta1'
+    compile 'com.github.Sindusk:sindusklibrary:v1.0'
+    compile 'org.gotti.wurmunlimited:common:2182584'
+    compile 'org.gotti.wurmunlimited:server:2182584'
+}
+
+jar {
+    archiveName "${project.name}.jar"
+}
+
+
+task dist(type: Zip) {
+    into("mods", {
+        into(project.name, {
+            from jar
+        })
+        from fileTree(dir: 'mods', include: '*')
+    })
+
+    archiveName "${project.name}-${project.version}.zip"
+}
