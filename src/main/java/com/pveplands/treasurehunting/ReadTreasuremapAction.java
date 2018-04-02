@@ -53,10 +53,8 @@ public class ReadTreasuremapAction implements ActionPerformer, ModAction {
                     return true;
                 }
                 if (target.getData2() != Servers.localServer.id){
-                    if(target.getData2() == 567 || target.getData2() == 678 || target.getData2() == 9617){
-                        performer.getCommunicator().sendNormalServerMessage("This treasuremap belongs to a different island.");
-                        return true;
-                    }
+                    performer.getCommunicator().sendNormalServerMessage("This treasuremap belongs to a different island.");
+                    return true;
                 }
 
                 performer.getCommunicator().sendNormalServerMessage("You roll out the map, find your bearings, and try to locate the marked spot.");
