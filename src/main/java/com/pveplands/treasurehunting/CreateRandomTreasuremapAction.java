@@ -43,34 +43,34 @@ public class CreateRandomTreasuremapAction implements ActionPerformer, ModAction
     public boolean action(@NotNull Action action, @NotNull Creature performer, @NotNull Item source, @NotNull Item target, short num, float counter) {
         return performMyAction(performer, source);
     }
-    
+
     private boolean performMyAction(Creature performer, Item activated) {
         if (performer.getPower() <= 1) {
             Logger.getLogger(TreasureHunting.getLoggerName(CreateRandomTreasuremapAction.class))
-                .warning(String.format("%s tried to spawn a random treasuremap, this might well fall under exploiting.", performer));
-            
+                    .warning(String.format("%s tried to spawn a random treasuremap, this might well fall under exploiting.", performer));
+
             return true;
         }
-        
+
         Item map = Treasuremap.CreateTreasuremap(performer, null, null, null, true);
-        
+
         if (map == null) {
             performer.getCommunicator().sendNormalServerMessage("Treasuremap creation failed, probably couldn't find a suitable spot within 100 tries. Try again.");
         }
         else {
             float quality;
 
-            if (activated.getAuxData() < 1 || activated.getAuxData() > 100) 
+            if (activated.getAuxData() < 1 || activated.getAuxData() > 100)
                 quality = new java.util.Random().nextFloat() * 100f;
             else
                 quality = activated.getAuxData();
-            
+
             map.setQualityLevel(quality);
 
             performer.getInventory().insertItem(map, true);
             performer.getCommunicator().sendNormalServerMessage(String.format("Treasuremap with treasure at %d, %d placed in your inventory.", map.getDataX(), map.getDataY()));
         }
-        
+
         return true;
     }
 }

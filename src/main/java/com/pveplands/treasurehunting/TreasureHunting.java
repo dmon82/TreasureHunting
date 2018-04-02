@@ -3,7 +3,6 @@ package com.pveplands.treasurehunting;
 import com.wurmonline.server.MiscConstants;
 import com.wurmonline.server.items.ItemTemplateCreator;
 import java.util.Properties;
-import java.util.Random;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javassist.CannotCompileException;
@@ -25,51 +24,52 @@ import org.gotti.wurmunlimited.modsupport.actions.ModActions;
  * using a compass on them. Once at the right spot, a pickaxe or shovel can be
  * used on the map to dig up the treasure chest. Rewards and monster spawns can
  * be configured.
- * 
+ *
  * GameMasters may create treasure maps using their wands, teleport to the
  * target location, and use any tool to dig up the treasure.
- * 
+ *
  * This mod was brought to you by http://pveplands.com
- * Forum post: 
+ * Forum post:
  */
 public class TreasureHunting implements WurmServerMod, Configurable, Initable, PreInitable, ItemTemplatesCreatedListener, ServerStartedListener {
     private static final Logger logger = Logger.getLogger(getLoggerName(TreasureHunting.class));
+    @SuppressWarnings("rawtypes")
     public static String getLoggerName(Class c) { return String.format("%s (v%s)", c.getName(), c.getPackage().getImplementationVersion()); }
-    
-    private static final Random random = new Random();
-    
+
+    //private static final Random random = new Random();
+
     private static final TreasureOptions options = new TreasureOptions();
     public static TreasureOptions getOptions() {
         return options;
     }
-    
+
     public TreasureHunting () {
     }
-    
+
     @Override
     public void preInit() {
         AddMethodCallsTerraforming();
         AddMethodCallsMining();
         AddMethodCallsFishing();
         AddMethodCallsHunting();
-        
+
         ModActions.init();
     }
-    
+
     @Override
     public void configure(Properties p) {
         logger.info("Loading configuration.");
         options.configure(p);
         logger.info("Configuration loaded.");
     }
-    
+
     @Override
     public void onItemTemplatesCreated() {
         try {
             ItemTemplateCreator.createItemTemplate(options.getTreasuremapTemplateId(), "treasure map", "treasure maps", "excellent", "good", "ok", "poor",
-                "An old weathered treasure map with a big X marking a spot. What could you use on it, to get directions?",
-                new short[] { 48, 157, 187 }, (short)640, (short)1, 0, 3024000L, 5, 5, 5, -10,
-                MiscConstants.EMPTY_BYTE_PRIMITIVE_ARRAY, "model.resource.sheet.", 5f, 500, (byte)33, 5000, true);
+                    "An old weathered treasure map with a big X marking a spot. What could you use on it, to get directions?",
+                    new short[] { 48, 157, 187 }, (short)640, (short)1, 0, 3024000L, 5, 5, 5, -10,
+                    MiscConstants.EMPTY_BYTE_PRIMITIVE_ARRAY, "model.resource.sheet.", 5f, 500, (byte)33, 20000, true);
         }
         catch (Exception e) {
             logger.log(Level.SEVERE, "Could not create treasure map item.", e);
@@ -88,7 +88,7 @@ public class TreasureHunting implements WurmServerMod, Configurable, Initable, P
         ModActions.registerAction(options.setChestAction(new SpawnTreasurechestAction()));
         ModActions.registerAction(options.setBehaviours(new TreasureBehaviour()));
     }
-    
+
     /**
      * Injects calls to our mod whenever a creature dies and there were
      * attackers (i.e. it did not die of old age). This will create treasure
@@ -97,15 +97,15 @@ public class TreasureHunting implements WurmServerMod, Configurable, Initable, P
     private void AddMethodCallsHunting() {
         try {
             HookManager.getInstance().getClassPool().get("com.wurmonline.server.creatures.Creature")
-                .getMethod("die", "(Z)V")
-                .insertBefore("{ if (this.getLatestAttackers().length > 0) com.pveplands.treasurehunting.Treasuremap.CreateTreasuremap(null, null, null, this); }");
-                                //com.pveplands.treasurehunting.Treasuremap.debugDeath(this);
+                    .getMethod("die", "(Z)V")
+                    .insertBefore("{ if (this.getLatestAttackers().length > 0) com.pveplands.treasurehunting.Treasuremap.CreateTreasuremap(null, null, null, this); }");
+            //com.pveplands.treasurehunting.Treasuremap.debugDeath(this);
         }
         catch (Exception e) {
             logger.log(Level.SEVERE, "Can't add methods to hunting.", e);
         }
     }
-    
+
     /**
      * Injects calls to mining, whenever rock shards are created during mining
      * a wall, and leveling or flatting a cave floor or ceiling.
@@ -113,86 +113,86 @@ public class TreasureHunting implements WurmServerMod, Configurable, Initable, P
     private void AddMethodCallsMining() {
         try {
             CtMethod wallMethod = HookManager.getInstance().getClassPool().get("com.wurmonline.server.behaviours.CaveWallBehaviour")
-                .getMethod("action", "(Lcom/wurmonline/server/behaviours/Action;Lcom/wurmonline/server/creatures/Creature;Lcom/wurmonline/server/items/Item;IIZIISF)Z");
-            
+                    .getMethod("action", "(Lcom/wurmonline/server/behaviours/Action;Lcom/wurmonline/server/creatures/Creature;Lcom/wurmonline/server/items/Item;IIZIISF)Z");
+
             wallMethod.instrument(new ExprEditor() {
                 @Override
                 public void edit(MethodCall methodCall) throws CannotCompileException {
                     if (methodCall.getMethodName().equals("putItemInfrontof")) {
                         wallMethod.insertAt(
-                            methodCall.getLineNumber() + 1, 
-                            "{ com.pveplands.treasurehunting.Treasuremap.CreateTreasuremap(performer, source, performer.getSkills().getSkillOrLearn(1008), (com.wurmonline.server.creatures.Creature)null); }"
+                                methodCall.getLineNumber() + 1,
+                                "{ com.pveplands.treasurehunting.Treasuremap.CreateTreasuremap(performer, source, performer.getSkills().getSkillOrLearn(1008), (com.wurmonline.server.creatures.Creature)null); }"
                         );
                     }
                 }
             });
-            
+
             CtMethod tileMineMethod = HookManager.getInstance().getClassPool().get("com.wurmonline.server.behaviours.CaveTileBehaviour")
-                .getMethod("handle_MINE", "(Lcom/wurmonline/server/behaviours/Action;Lcom/wurmonline/server/creatures/Creature;Lcom/wurmonline/server/items/Item;IISFI)Z");
-            
+                    .getMethod("handle_MINE", "(Lcom/wurmonline/server/behaviours/Action;Lcom/wurmonline/server/creatures/Creature;Lcom/wurmonline/server/items/Item;IISFI)Z");
+
             tileMineMethod.instrument(new ExprEditor() {
                 @Override
                 public void edit(MethodCall methodCall) throws CannotCompileException {
                     if (methodCall.getMethodName().equals("putItemInfrontof")) {
                         tileMineMethod.insertAt(
-                            methodCall.getLineNumber() + 1, 
-                            "{ com.pveplands.treasurehunting.Treasuremap.CreateTreasuremap(performer, source, performer.getSkills().getSkillOrLearn(1008), (com.wurmonline.server.creatures.Creature)null); }"
+                                methodCall.getLineNumber() + 1,
+                                "{ com.pveplands.treasurehunting.Treasuremap.CreateTreasuremap(performer, source, performer.getSkills().getSkillOrLearn(1008), (com.wurmonline.server.creatures.Creature)null); }"
                         );
                     }
                 }
             });
-            
+
             // private boolean flatten(Creature performer, Item source, int tile, int tilex, int tiley, float counter, Action act, int dir) {
             CtMethod tileFlattenMethod = HookManager.getInstance().getClassPool().get("com.wurmonline.server.behaviours.CaveTileBehaviour")
-                .getMethod("flatten", "(Lcom/wurmonline/server/creatures/Creature;Lcom/wurmonline/server/items/Item;IIIFLcom/wurmonline/server/behaviours/Action;I)Z");
-            
+                    .getMethod("flatten", "(Lcom/wurmonline/server/creatures/Creature;Lcom/wurmonline/server/items/Item;IIIFLcom/wurmonline/server/behaviours/Action;I)Z");
+
             tileFlattenMethod.instrument(new ExprEditor() {
                 @Override
                 public void edit(MethodCall methodCall) throws CannotCompileException {
                     if (methodCall.getMethodName().equals("putItemInfrontof")) {
                         tileFlattenMethod.insertAt(
-                            methodCall.getLineNumber() + 1, 
-                            "{ com.pveplands.treasurehunting.Treasuremap.CreateTreasuremap(performer, source, performer.getSkills().getSkillOrLearn(1008), (com.wurmonline.server.creatures.Creature)null); }"
+                                methodCall.getLineNumber() + 1,
+                                "{ com.pveplands.treasurehunting.Treasuremap.CreateTreasuremap(performer, source, performer.getSkills().getSkillOrLearn(1008), (com.wurmonline.server.creatures.Creature)null); }"
                         );
                     }
                 }
             });
-            
+
             // Surface mining and tunneling.
             // public static final boolean mine(Action act, Creature performer, Item source, int tilex, int tiley, short action, float counter, int digTilex, int digTiley) {
             CtMethod surfaceMiningMethod = HookManager.getInstance().getClassPool().get("com.wurmonline.server.behaviours.TileRockBehaviour")
-                .getDeclaredMethod("mine"/*, "Lcom/wurmonline/server/behaviours/Action;Lcom/wurmonline/server/creatures/Creature;Lcom/wurmonline/server/items/Item;IISFII)Z"*/);
-            
+                    .getDeclaredMethod("mine"/*, "Lcom/wurmonline/server/behaviours/Action;Lcom/wurmonline/server/creatures/Creature;Lcom/wurmonline/server/items/Item;IISFII)Z"*/);
+
             surfaceMiningMethod.instrument(new ExprEditor() {
                 @Override
                 public void edit(MethodCall  methodCall) throws CannotCompileException {
                     if (methodCall.getMethodName().equals("createItem")) {
-                        surfaceMiningMethod.insertAt(methodCall.getLineNumber() + 1, 
-                            "{ com.pveplands.treasurehunting.Treasuremap.CreateTreasuremap(performer, source, performer.getSkills().getSkillOrLearn(10009), (com.wurmonline.server.creatures.Creature)null); }");
+                        surfaceMiningMethod.insertAt(methodCall.getLineNumber() + 1,
+                                "{ com.pveplands.treasurehunting.Treasuremap.CreateTreasuremap(performer, source, performer.getSkills().getSkillOrLearn(10009), (com.wurmonline.server.creatures.Creature)null); }");
                     }
                 }
             });
-            
+
             // public boolean action(Action act, Creature performer, Item source, int tilex, int tiley, boolean onSurface, int heightOffset, int tile, short action, float counter) {
             CtMethod tunnelingMethod = HookManager.getInstance().getClassPool().get("com.wurmonline.server.behaviours.TileRockBehaviour")
-                .getMethod("action", "(Lcom/wurmonline/server/behaviours/Action;Lcom/wurmonline/server/creatures/Creature;Lcom/wurmonline/server/items/Item;IIZIISF)Z");
-            
+                    .getMethod("action", "(Lcom/wurmonline/server/behaviours/Action;Lcom/wurmonline/server/creatures/Creature;Lcom/wurmonline/server/items/Item;IIZIISF)Z");
+
             tunnelingMethod.instrument(new ExprEditor() {
                 @Override
                 public void edit(MethodCall  methodCall) throws CannotCompileException {
                     if (methodCall.getMethodName().equals("createItem")) {
-                        tunnelingMethod.insertAt(methodCall.getLineNumber() + 1, 
-                            "{ com.pveplands.treasurehunting.Treasuremap.CreateTreasuremap(performer, source, performer.getSkills().getSkillOrLearn(10009), (com.wurmonline.server.creatures.Creature)null); }");
+                        tunnelingMethod.insertAt(methodCall.getLineNumber() + 1,
+                                "{ com.pveplands.treasurehunting.Treasuremap.CreateTreasuremap(performer, source, performer.getSkills().getSkillOrLearn(10009), (com.wurmonline.server.creatures.Creature)null); }");
                     }
                 }
             });
-            
+
         }
         catch (Exception e) {
             logger.log(Level.SEVERE, "Can't add method calls to mining.", e);
         }
     }
-    
+
     /**
      * Injects a call to fishing, whenever it tries to give the player a
      * certain achievement, which is equivalent to a fish being called. But
@@ -202,19 +202,19 @@ public class TreasureHunting implements WurmServerMod, Configurable, Initable, P
     private void AddMethodCallsFishing() {
         try {
             CtMethod method = HookManager.getInstance().getClassPool().get("com.wurmonline.server.behaviours.Fish")
-                .getMethod("fish", "(Lcom/wurmonline/server/creatures/Creature;Lcom/wurmonline/server/items/Item;IIIFLcom/wurmonline/server/behaviours/Action;)Z");
-            
+                    .getMethod("fish", "(Lcom/wurmonline/server/creatures/Creature;Lcom/wurmonline/server/items/Item;IIIFLcom/wurmonline/server/behaviours/Action;)Z");
+
             method.instrument(new ExprEditor() {
                 private boolean done = false;
-                
+
                 @Override
                 public void edit(MethodCall methodCall) throws CannotCompileException {
                     if (!done && methodCall.getMethodName().equals("achievement")) {
                         done = true;
-                        
+
                         method.insertAt(
-                            methodCall.getLineNumber() + 1, 
-                            "{ com.pveplands.treasurehunting.Treasuremap.CreateTreasuremap(performer, source, performer.getSkills().getSkillOrLearn(10033), (com.wurmonline.server.creatures.Creature)null); }"
+                                methodCall.getLineNumber() + 1,
+                                "{ com.pveplands.treasurehunting.Treasuremap.CreateTreasuremap(performer, source, performer.getSkills().getSkillOrLearn(10033), (com.wurmonline.server.creatures.Creature)null); }"
                         );
                     }
                 }
@@ -224,7 +224,7 @@ public class TreasureHunting implements WurmServerMod, Configurable, Initable, P
             logger.log(Level.SEVERE, "Can't add methods to fishing.", e);
         }
     }
-    
+
     /**
      * Injects calls to the terraforming class whenever something is dug,
      * like dirt, clay, or tar, and when flattening or leveling modifies
@@ -233,11 +233,11 @@ public class TreasureHunting implements WurmServerMod, Configurable, Initable, P
     private void AddMethodCallsTerraforming() {
         try {
             CtMethod method = HookManager.getInstance().getClassPool().get("com.wurmonline.server.behaviours.Terraforming")
-                .getMethod("dig", "(Lcom/wurmonline/server/creatures/Creature;Lcom/wurmonline/server/items/Item;IIIFZLcom/wurmonline/mesh/MeshIO;)Z");
-            
+                    .getMethod("dig", "(Lcom/wurmonline/server/creatures/Creature;Lcom/wurmonline/server/items/Item;IIIFZLcom/wurmonline/mesh/MeshIO;)Z");
+
             method.instrument(new ExprEditor() {
                 private boolean done = false;
-                
+
                 @Override
                 public void edit(MethodCall methodCall) throws CannotCompileException {
                     if (!done && methodCall.getMethodName().equals("createItem")){
@@ -246,18 +246,18 @@ public class TreasureHunting implements WurmServerMod, Configurable, Initable, P
                     }
                 }
             });
-            
+
             // private static final boolean flatten(long borderId, Creature performer, Item source, int tile, int tilex, int tiley, int endX, int endY, int numbCorners, float counter, Action act) {
             CtMethod flatten = HookManager.getInstance().getClassPool().get("com.wurmonline.server.behaviours.Flattening")
-                .getMethod("flatten", "(JLcom/wurmonline/server/creatures/Creature;Lcom/wurmonline/server/items/Item;IIIIIIFLcom/wurmonline/server/behaviours/Action;)Z");
-            
+                    .getMethod("flatten", "(JLcom/wurmonline/server/creatures/Creature;Lcom/wurmonline/server/items/Item;IIIIIIFLcom/wurmonline/server/behaviours/Action;)Z");
+
             flatten.instrument(new ExprEditor() {
                 @Override
                 public void edit(MethodCall methodCall) throws CannotCompileException {
                     if (methodCall.getMethodName().equals("resetChangedTiles")) {
                         flatten.insertAt(methodCall.getLineNumber() + 1, "{ com.pveplands.treasurehunting.Treasuremap.CreateTreasuremap(performer, source, performer.getSkills().getSkillOrLearn(1009), (com.wurmonline.server.creatures.Creature)null); }");
                         logger.log(Level.INFO, "Found method call in Flattening, inserting call to treasuremap generation.");
-                }
+                    }
                 }
             });
         }
@@ -265,7 +265,7 @@ public class TreasureHunting implements WurmServerMod, Configurable, Initable, P
             logger.log(Level.SEVERE, "Can't add method calls to terraforming.", e);
         }
     }
-    
+
     @Override
     public void init() {
     }
