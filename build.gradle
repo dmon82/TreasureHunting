@@ -1,7 +1,7 @@
 apply plugin: 'java'
 
 group "mod.sin"
-version "1.1.4"
+version "1.2"
 
 repositories {
     mavenCentral()
@@ -11,10 +11,8 @@ repositories {
 
 dependencies {
     compile 'com.intellij:annotations:+@jar'
-    compile 'org.gotti.wurmunlimited:server-modlauncher:0.33-beta1'
-    compile 'com.github.Sindusk:sindusklibrary:v1.0'
-    compile 'org.gotti.wurmunlimited:common:2182584'
-    compile 'org.gotti.wurmunlimited:server:2182584'
+    compile 'org.gotti.wurmunlimited:server-modlauncher:0.35-beta1'
+    compile 'com.github.Sindusk:sindusklibrary:v1.1'
 
 }
 

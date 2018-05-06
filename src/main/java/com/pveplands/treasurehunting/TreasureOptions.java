@@ -32,6 +32,8 @@ public class TreasureOptions {
     private int mapHuntingChance = 100;
     private int mapUniqueChance = 10000;
     private int mapFishingChance = 10000;
+    private int mapWoodcuttingChance = 10000;
+    private int mapForagingChance = 5000;
     
     private int maxHeightDiff = 72;
     private double mapBaseDiff = 30d;
@@ -42,6 +44,11 @@ public class TreasureOptions {
     private int[] groupWeights;
     private int[] spawnWeights = new int[10];
     private int[] spawnLimits = new int[10];
+
+    private float rareSpawnMapQuality = 101;
+    private float rareSpawnChance = 500;
+    private int rareSpawnWeight = 100;
+    private int extremelyRareSpawnWeight = 135;
     
     private int baseMoneyReward = 10000;
     private float moneyMultiplier = 1.0f;
@@ -164,6 +171,14 @@ public class TreasureOptions {
         setMapSurfaceMiningChance(Math.min(2147483647, Math.max(0, getMapSurfaceMiningChance())));
         logger.log(Level.INFO, "Map surface mining chance: {0}", getMapSurfaceMiningChance());
 
+        setMapWoodcuttingChance(Integer.valueOf(p.getProperty("mapWoodcuttingChance", String.valueOf(getMapWoodcuttingChance()))));
+        setMapWoodcuttingChance(Math.min(2147483647, Math.max(0, getMapWoodcuttingChance())));
+        logger.log(Level.INFO, "Map woodcutting chance: {0}", getMapWoodcuttingChance());
+
+        setMapForagingChance(Integer.valueOf(p.getProperty("mapForagingChance", String.valueOf(getMapForagingChance()))));
+        setMapForagingChance(Math.min(2147483647, Math.max(0, getMapForagingChance())));
+        logger.log(Level.INFO, "Map foraging chance: {0}", getMapForagingChance());
+
         setMapHuntingChance(Integer.valueOf(p.getProperty("mapHuntingChance", String.valueOf(getMapHuntingChance()))));
         setMapHuntingChance(Math.min(2147483647, Math.max(0, getMapHuntingChance())));
         logger.log(Level.INFO, "Map hunting chance: {0}", getMapHuntingChance());
@@ -251,11 +266,27 @@ public class TreasureOptions {
         
         logger.info(String.format("Spawn weights: %s", Arrays.toString(getSpawnWeights())));
         logger.info(String.format("Spawn limits: %s", Arrays.toString(getSpawnLimits())));
+
+        setRareSpawnMapQuality(Float.valueOf(p.getProperty("rareSpawnMapQuality", String.valueOf(getRareSpawnMapQuality()))));
+        setRareSpawnMapQuality(Math.min(101.0f, Math.max(0.0f, getRareSpawnMapQuality())));
+        logger.log(Level.INFO, "Rare spawn map quality: {0}", getRareSpawnMapQuality());
+
+        setRareSpawnChance(Float.valueOf(p.getProperty("rareSpawnChance", String.valueOf(getRareSpawnChance()))));
+        setRareSpawnChance(Math.min(Float.MAX_VALUE, Math.max(0.0f, getRareSpawnChance())));
+        logger.log(Level.INFO, "Rare spawn chance: {0}", getRareSpawnChance());
+
+        setRareSpawnWeight(Integer.valueOf(p.getProperty("rareSpawnWeight", String.valueOf(getRareSpawnWeight()))));
+        setRareSpawnWeight(Math.min(Integer.MAX_VALUE, Math.max(0, getRareSpawnWeight())));
+        logger.log(Level.INFO, "Rare spawn weight: {0}", getRareSpawnWeight());
+
+        setExtremelyRareSpawnWeight(Integer.valueOf(p.getProperty("extremelyRareSpawnWeight", String.valueOf(getExtremelyRareSpawnWeight()))));
+        setExtremelyRareSpawnWeight(Math.min(Integer.MAX_VALUE, Math.max(0, getExtremelyRareSpawnWeight())));
+        logger.log(Level.INFO, "Extremely rare spawn weight: {0}", getExtremelyRareSpawnWeight());
         
         setBaseMoneyReward(Integer.valueOf(p.getProperty("baseMoneyReward", String.valueOf(getBaseMoneyReward()))));
         setBaseMoneyReward(Math.min(1000000, Math.max(0, getBaseMoneyReward())));
         logger.log(Level.INFO, "Base money reward: {0}", getBaseMoneyReward());
-        
+
         setMoneyMultiplier(Float.valueOf(p.getProperty("moneyRewardMultiplier", String.valueOf(getMoneyMultiplier()))));
         setMoneyMultiplier(Math.min(100.0f, Math.max(0.0f, getMoneyMultiplier())));
         logger.log(Level.INFO, "Money reward multiplier: {0}", getMoneyMultiplier());
@@ -622,6 +653,14 @@ public class TreasureOptions {
         this.mapMiningChance = mapMiningChance;
     }
 
+    public int getMapWoodcuttingChance() {
+        return mapWoodcuttingChance;
+    }
+
+    public void setMapWoodcuttingChance(int mapWoodcuttingChance) {
+        this.mapWoodcuttingChance = mapWoodcuttingChance;
+    }
+
     public int getMapHuntingChance() {
         return mapHuntingChance;
     }
@@ -644,6 +683,14 @@ public class TreasureOptions {
 
     public void setMapFishingChance(int mapFishingChance) {
         this.mapFishingChance = mapFishingChance;
+    }
+
+    public int getMapForagingChance() {
+        return mapForagingChance;
+    }
+
+    public void setMapForagingChance(int mapForagingChance) {
+        this.mapForagingChance = mapForagingChance;
     }
 
     public int getMaxHeightDiff() {
@@ -700,6 +747,38 @@ public class TreasureOptions {
 
     public void setSpawnLimits(int[] spawnLimits) {
         this.spawnLimits = spawnLimits;
+    }
+
+    public float getRareSpawnMapQuality(){
+        return rareSpawnMapQuality;
+    }
+
+    public void setRareSpawnMapQuality(float rareSpawnMapQuality){
+        this.rareSpawnMapQuality = rareSpawnMapQuality;
+    }
+
+    public float getRareSpawnChance(){
+        return rareSpawnChance;
+    }
+
+    public void setRareSpawnChance(float rareSpawnChance){
+        this.rareSpawnChance = rareSpawnChance;
+    }
+
+    public int getRareSpawnWeight(){
+        return rareSpawnWeight;
+    }
+
+    public void setRareSpawnWeight(int rareSpawnWeight){
+        this.rareSpawnWeight = rareSpawnWeight;
+    }
+
+    public int getExtremelyRareSpawnWeight(){
+        return extremelyRareSpawnWeight;
+    }
+
+    public void setExtremelyRareSpawnWeight(int extremelyRareSpawnWeight){
+        this.extremelyRareSpawnWeight = extremelyRareSpawnWeight;
     }
 
     public int getBaseMoneyReward() {

@@ -24,6 +24,7 @@ import com.wurmonline.server.zones.Zones;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Random;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -46,7 +47,7 @@ public class Treasuremap {
     public static boolean SpawnGuards(Creature performer, Item map, Item chest) {
         TreasureOptions options = TreasureHunting.getOptions();
         boolean spawnedGuards = false;
-        double quality = map.getCurrentQualityLevel() + map.getRarity() * 2f;
+        double quality = Math.max(1, Math.min(100d, map.getCurrentQualityLevel() + ((100-map.getCurrentQualityLevel()) * (map.getRarity() * 0.25f))));
         int tier = (int)Math.min(9, Math.max(0, quality / 10d));
 
         int weightToSpawn = options.getSpawnWeights()[tier];
@@ -56,10 +57,14 @@ public class Treasuremap {
                 map.getCurrentQualityLevel(), tier, quality, weightToSpawn, weightLimit, performer.getName() ));
 
         try {
-            if(weightToSpawn >= 250 && 200f*random.nextFloat() <= map.getCurrentQualityLevel()-80f){
+            float rareSpawnMapQuality = options.getRareSpawnMapQuality();
+            float rareSpawnChance = options.getRareSpawnChance();
+            int rareSpawnWeight = options.getRareSpawnWeight();
+            if(weightToSpawn >= rareSpawnWeight && rareSpawnChance*random.nextFloat() <= quality-rareSpawnMapQuality){
                 ArrayList<Integer> templates = new ArrayList<>();
                 int weightReduction;
-                if(weightToSpawn >= 400 && random.nextBoolean()){
+                int extremelyRareSpawnWeight = options.getExtremelyRareSpawnWeight();
+                if(weightToSpawn >= extremelyRareSpawnWeight && random.nextBoolean()){
                     templates.add(CreatureTemplateIds.DRAGON_BLACK_CID);
                     templates.add(CreatureTemplateIds.DRAGON_BLUE_CID);
                     templates.add(CreatureTemplateIds.DRAGON_GREEN_CID);
@@ -67,7 +72,7 @@ public class Treasuremap {
                     templates.add(CreatureTemplateIds.DRAGON_WHITE_CID);
                     templates.add(CreatureTemplateIds.TROLL_KING_CID);
                     templates.add(CreatureTemplateIds.CYCLOPS_CID);
-                    weightReduction = 400;
+                    weightReduction = extremelyRareSpawnWeight;
                 }else{
                     templates.add(CreatureTemplateIds.DRAKE_BLACK_CID);
                     templates.add(CreatureTemplateIds.DRAKE_BLUE_CID);
@@ -76,7 +81,7 @@ public class Treasuremap {
                     templates.add(CreatureTemplateIds.DRAKE_WHITE_CID);
                     templates.add(CreatureTemplateIds.GOBLIN_LEADER_CID);
                     templates.add(CreatureTemplateIds.FOREST_GIANT_CID);
-                    weightReduction = 250;
+                    weightReduction = rareSpawnWeight;
                 }
                 CreatureTemplate template;
                 int i = 5; // Safety to ensure that we don't check too many times. If it fails, no big deal.
@@ -341,9 +346,9 @@ public class Treasuremap {
             // Vanilla-like rarity chance/
             byte rarity = GetMapRarity(performer);
             if(rarity == 0 && killed != null && killed.isUnique()){
-                if(random.nextInt(20) == 0){
+                if(random.nextInt(40) == 0){
                     rarity = 3;
-                }else if(random.nextInt(5) == 0){
+                }else if(random.nextInt(10) == 0){
                     rarity = 2;
                 }else{
                     rarity = 1;
@@ -417,7 +422,7 @@ public class Treasuremap {
                 power = random.nextDouble() * 100d;
             }
             if(killed != null && killed.isUnique()){
-                power = 80d + (random.nextDouble() * 20d);
+                power = 80d + (random.nextDouble() * 15d);
             }
 
             treasuremap = ItemFactory.createItem(options.getTreasuremapTemplateId(), Math.min(99f, Math.max(1.0f, (float)power)), rarity, null);
@@ -536,6 +541,29 @@ public class Treasuremap {
      * @param killed The killed creature.
      * @return True if a map should be created, otherwise false.
      */
+    protected static HashMap<Long, Integer> diggingChances = new HashMap<>();
+    protected static HashMap<Long, Integer> fishingChances = new HashMap<>();
+    protected static HashMap<Long, Integer> miningChances = new HashMap<>();
+    protected static HashMap<Long, Integer> surfaceMiningChances = new HashMap<>();
+    protected static HashMap<Long, Integer> woodcuttingChances = new HashMap<>();
+    protected static HashMap<Long, Integer> foragingChances = new HashMap<>();
+
+    public static boolean GetPlayerPseudoChance(Creature performer, HashMap<Long, Integer> pseudoMap, int optionChance){
+        long wurmid = performer.getWurmId();
+        if(pseudoMap.containsKey(wurmid)){
+            int currentChance = pseudoMap.get(wurmid);
+            boolean success = random.nextInt(currentChance) == 0;
+            if(success){
+                pseudoMap.put(wurmid, currentChance+optionChance-1);
+            }else{
+                pseudoMap.put(wurmid, currentChance-1);
+            }
+            return success;
+        }else{
+            pseudoMap.put(performer.getWurmId(), optionChance-1);
+            return random.nextInt(optionChance) == 0;
+        }
+    }
     public static boolean ShouldCreateTreasuremap(Creature performer, Item activated, Skill skill, Creature killed) {
         TreasureOptions options = TreasureHunting.getOptions();
 
@@ -599,8 +627,8 @@ public class Treasuremap {
         }
 
         // All arguments were null, the method should not be called like this.
-        if (performer == null || activated == null || skill == null) {
-            logger.info("Performer, activated, or skill is null, and killed was null as well. Should not create treasuremap.");
+        if (performer == null || skill == null) {
+            logger.info("Performer or skill is null, and killed was null as well. Should not create treasuremap.");
             return false;
         }
 
@@ -610,21 +638,49 @@ public class Treasuremap {
                 if (options.getMapDiggingChance() <= 0)
                     return false;
 
+                if(performer.isPlayer()) {
+                    return GetPlayerPseudoChance(performer, diggingChances, options.getMapDiggingChance());
+                }
                 return random.nextInt(options.getMapDiggingChance()) == 0;
             case SkillList.FISHING:
                 if (options.getMapFishingChance() <= 0)
                     return false;
 
+                if(performer.isPlayer()) {
+                    return GetPlayerPseudoChance(performer, fishingChances, options.getMapFishingChance());
+                }
                 return random.nextInt(options.getMapFishingChance()) == 0;
             case SkillList.MINING:
                 if (options.getMapMiningChance() <= 0)
                     return false;
 
+                if (performer.isPlayer()) {
+                    return GetPlayerPseudoChance(performer, miningChances, options.getMapMiningChance());
+                }
                 return random.nextInt(options.getMapMiningChance()) == 0;
             case SkillList.PICKAXE:
                 if (options.getMapSurfaceMiningChance() <= 0)
                     return false;
 
+                if (performer.isPlayer()) {
+                    return GetPlayerPseudoChance(performer, surfaceMiningChances, options.getMapSurfaceMiningChance());
+                }
+                return random.nextInt(options.getMapSurfaceMiningChance()) == 0;
+            case SkillList.WOODCUTTING:
+                if (options.getMapWoodcuttingChance() <= 0)
+                    return false;
+
+                if (performer.isPlayer()) {
+                    return GetPlayerPseudoChance(performer, woodcuttingChances, options.getMapWoodcuttingChance());
+                }
+                return random.nextInt(options.getMapSurfaceMiningChance()) == 0;
+            case SkillList.FORAGING:
+                if (options.getMapForagingChance() <= 0)
+                    return false;
+
+                if (performer.isPlayer()) {
+                    return GetPlayerPseudoChance(performer, foragingChances, options.getMapForagingChance());
+                }
                 return random.nextInt(options.getMapSurfaceMiningChance()) == 0;
             default:
                 logger.warning("Tried to create treasuremap for unapproved activity " + skill.getName());

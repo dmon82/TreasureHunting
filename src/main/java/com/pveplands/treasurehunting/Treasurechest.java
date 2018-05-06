@@ -3,6 +3,8 @@ package com.pveplands.treasurehunting;
 import com.wurmonline.server.creatures.Creature;
 import com.wurmonline.server.items.Item;
 import com.wurmonline.server.items.ItemFactory;
+import com.wurmonline.server.items.ItemList;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.logging.Level;
@@ -30,10 +32,10 @@ public class Treasurechest {
         Item chest = null;
         
         try {
-            double quality = Math.max(1, Math.min(100d, map.getCurrentQualityLevel() + (map.getRarity() * 10)));
+            double quality = Math.max(1, Math.min(100d, map.getCurrentQualityLevel() + ((100-map.getCurrentQualityLevel()) * (map.getRarity() * 0.25f))));
             
             logger.info("Creating treasure chest item.");
-            chest = ItemFactory.createItem(995, (float)quality, map.getRarity(), null);
+            chest = ItemFactory.createItem(ItemList.treasureChest, (float)quality, map.getRarity(), null);
             
             logger.info("Creating money reward.");
             add(chest, Treasurereward.getMoney(quality));
