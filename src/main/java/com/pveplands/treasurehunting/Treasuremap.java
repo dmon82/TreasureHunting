@@ -44,6 +44,8 @@ public class Treasuremap {
      * @param chest The chest that was spawned.
      * @return true if one or more creatures were spawns, or false otherwise.
      */
+    public static HashMap<Long,Long> guardians = new HashMap<>();
+    public static HashMap<Long,Integer> guardianCount = new HashMap<>();
     public static boolean SpawnGuards(Creature performer, Item map, Item chest) {
         TreasureOptions options = TreasureHunting.getOptions();
         boolean spawnedGuards = false;
@@ -99,7 +101,7 @@ public class Treasuremap {
                     int x = chest.getTileX() + (random.nextInt(3) * (random.nextBoolean() ? -1 : 1));
                     int y = chest.getTileY() + (random.nextInt(3) * (random.nextBoolean() ? -1 : 1));
                     String name = String.format("%s ambushing %s", template.getName(), performer.getName());
-                    Creature rareSpawn = Creature.doNew(template.getTemplateId(), (x << 2) + 2, (y << 2) + 2, 360f*Server.rand.nextFloat(), 1, name, (byte)0);
+                    Creature rareSpawn = Creature.doNew(template.getTemplateId(), (x << 2) + 2, (y << 2) + 2, 360f*Server.rand.nextFloat(), 0, name, (byte)0);
                     SoundPlayer.playSound(template.getHitSound(rareSpawn.getSex()), x, y, true, 0.3f);
                     weightToSpawn -= weightReduction;
                 }else{
@@ -162,7 +164,14 @@ public class Treasuremap {
                 logger.info(String.format("Spawning %s at age %d.", template.getName(), age));
                 String name = String.format("%s ambushing %s", template.getName(), performer.getName());
 
-                Creature.doNew(id, true, (x << 2) + 2, (y << 2) + 2, random.nextFloat() * 360f, 0, name, gender, (byte)0, (byte)0, false, (byte)age);
+                Creature cret = Creature.doNew(id, true, (x << 2) + 2, (y << 2) + 2, random.nextFloat() * 360f, 0, name, gender, (byte)0, (byte)0, false, (byte)age);
+                guardians.put(cret.getWurmId(), chest.getWurmId());
+                if(guardianCount.containsKey(chest.getWurmId())){
+                    guardianCount.put(chest.getWurmId(), guardianCount.get(chest.getWurmId())+1);
+                }else{
+                    guardianCount.put(chest.getWurmId(), 1);
+                }
+
                 SoundPlayer.playSound(template.getHitSound(gender), x, y, true, 0.3f);
 
                 spawnedGuards = true;
@@ -186,7 +195,7 @@ public class Treasuremap {
     public static int SpawnCreature(int totalWeight, int limit) throws Exception {
         TreasureOptions options = TreasureHunting.getOptions();
         int highSpawn = -1, lowSpawn = -1;
-        int spawnTemplateId = 0;
+        int spawnTemplateId;
 
         for (int i = options.getGroupWeights().length - 1; i >= 0; i--) {
             if (totalWeight >= options.getGroupWeights()[i] && options.getGroupWeights()[i] <= limit) {
