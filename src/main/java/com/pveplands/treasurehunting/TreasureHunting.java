@@ -85,11 +85,20 @@ public class TreasureHunting implements WurmServerMod, Configurable, Initable, P
             Class<TreasureHunting> thisClass = TreasureHunting.class;
             String replace;
 
+            // Die method description
+            CtClass ctString = classPool.get("java.lang.String");
+            CtClass[] params1 = new CtClass[]{
+                    CtClass.booleanType,
+                    ctString,
+                    CtClass.booleanType
+            };
+            String desc1 = Descriptor.ofMethod(CtClass.voidType, params1);
+
             Util.setReason("Register hook for creature death.");
             CtClass ctCreature = classPool.get("com.wurmonline.server.creatures.Creature");
             replace = "$_ = $proceed($$);"
                     + TreasureHunting.class.getName()+".checkTreasureGuardian(this, corpse);";
-            Util.instrumentDeclared(thisClass, ctCreature, "die", "setRotation", replace);
+            Util.instrumentDescribed(thisClass, ctCreature, "die", desc1, "setRotation", replace);
         } catch (NotFoundException e) {
             e.printStackTrace();
         }
